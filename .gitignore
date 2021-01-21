@@ -1,0 +1,7 @@
+node_modules/
+.idea/
+.vscode/
+lerna-debug.log
+npm-debug.log
+**/build/
+.env
