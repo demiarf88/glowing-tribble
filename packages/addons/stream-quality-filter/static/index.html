@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream Quality Filter</title>
+    <meta charset="utf-8">
+    <link rel="shortcut icon" href="https://i.imgur.com/iUBNpZM.png" type="image/x-icon">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap" rel="stylesheet">
+    <style>
+        *, p {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-size: cover;
+            background-position: center center;
+            background-repeat: repeat;
+            background-color: #1E1E1E;
+            /* background-image: linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)), url('https://i.imgur.com/313npRH.jpg'); */
+            font-family: 'Open Sans', Arial, sans-serif;
+            color: white;
+        }
+
+        .installBtn {
+            background-color: #8A5AAB;
+        }
+
+        a, .installBtn {
+            color: white
+        }
+
+        .logo {
+            height: 14vh;
+            width: 14vh;
+        }
+
+        .dropdown-item {
+            text-align: center;
+            color: black;
+        }
+
+        .dropdown-item:hover {
+            cursor: pointer;
+            text-decoration: underline !important;
+        }
+
+        footer {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container text-center">
+        <header class="py-5">
+            <img src="https://i.imgur.com/iUBNpZM.png" class="logo d-block mx-auto mb-4">
+            <h1 id="name"></h1>
+            <p class="lead" id="description">
+                Fetches streams from RARBG, 1337x, YTS and TPB+ addons, removes duplicates and sorts them by quality.
+            </p>
+            <span id="version"></span>
+        </header>
+
+        <main>
+            <h3>configuration</h3>
+
+            <p>Leave everything empty to apply the default settings.</p>
+
+            <h5 class="mt-3">Filters</h5>
+            <p>
+                The addon will apply the filters in the order your specify below.
+                It's recommended to order the filters from highest to lowest quality.
+            </p>
+            <div class="filters"></div>
+            <button class="addFilter btn btn-primary my-3">Add</button>
+
+            <form>
+                <div class="custom-control custom-checkbox mb-3">
+                    <input type="checkbox" class="custom-control-input" id="removeUnknown">
+                    <label class="custom-control-label" for="removeUnknown">Hide other (unknown) results</label>
+                </div>
+
+                <button name="Install" type="button" class="btn btn-lg installBtn">INSTALL</button>
+            </form>
+        </main>
+
+        <footer class="my-5 p-2">
+            <p>
+                <a href="https://github.com/sleeyax/stremio-addons">Github</a>
+                |
+                <a href="https://www.stremio.com/">Stremio</a>
+                |
+                <a href="https://reddit.com/r/Stremio">Reddit</a>
+                |
+                <a href="https://reddit.com/r/StremioAddons">Comunity reddit</a>
+            </p>
+        </footer>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+    <script>
+        var options = [
+            '3d',
+            '4k',
+            'uhd',
+            '2160p',
+            '1080p',
+            'hdrip',
+            'web-dl',
+            'hdtv',
+            '720p',
+            '480p',
+            'cam'
+        ];
+
+        function updateAddonInfo() {
+            $.get(window.location + 'manifest.json', function(manifest) {
+                $('#version').text('v' + manifest.version);
+                $('#name').text(manifest.name);
+            });
+        }
+
+        function appendFilter() {
+            $('div.filters').append(`<p><div class="input-append btn-group mt-3">
+                <input class="span2" type="text">
+                <button class="btn btn-secondary dropdown-toggle" id="abc" data-toggle="dropdown">
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    ${options.map(option => '<li><a class="dropdown-item">' + option + '</a></li>').join('')}
+                </ul>
+            </div></p>`);
+        }
+
+        function getFilters() {
+            var filters = [];
+            $('div.filters > .input-append > input.span2').each(function (i, el) {
+                var value = $(el).val();
+                if (value != '')
+                    filters.push(value);
+            });
+            return filters;
+        }
+
+        $(document).ready(function () {
+            updateAddonInfo();
+            appendFilter();
+
+            $('.filters').on('click', '.dropdown-item', function () {
+                var input = $(this).parent().parent().parent().find('input.span2'); // this can probably be improved but 😴
+                $(input).val($(this).text());
+            });
+
+            $('button.addFilter').click(function () {
+                appendFilter();
+            });
+
+            $('.installBtn').click(function () {
+                var url = window.location.toString().replace('http://', '').replace('https://', '');
+                console.log('stremio://' + url + 'manifest.json');
+                var filters = getFilters();
+                if (filters.length == 0) {
+                    window.location = 'stremio://' + url + 'manifest.json';
+                } else {
+                    if (!$('#removeUnknown').is(':checked'))
+                        filters.push('unknown');
+
+                    var filtersString = filters.join(',');
+
+                    window.location = 'stremio://' + url + filtersString + '/manifest.json';
+                }
+            });
+        });
+    </script>
+
+</html>

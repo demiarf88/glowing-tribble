@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "name": "stremio-podcasts-addon-dev",
+  "builds": [
+    {
+      "src": "src/serverless.js",
+      "use": "@now/node",
+      "config": {
+        "includeFiles": [
+          "cache/**"
+        ]
+      }
+    }
+  ],
+  "routes": [
+    { "src": "/.*", "dest": "/src/serverless.js" }
+  ],
+  "env": {
+    "LISTEN_NOTES_API_KEY": "@listen_notes_api_key"
+  }
+}

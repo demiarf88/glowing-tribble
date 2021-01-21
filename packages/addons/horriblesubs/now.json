@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "name": "stremio-horrible-addon-dev",
+  "builds": [
+    { "src": "src/serverless.js", "use": "@now/node" }
+  ],
+  "routes": [
+    { "src": "/.*", "dest": "/src/serverless.js" }
+  ]
+}
